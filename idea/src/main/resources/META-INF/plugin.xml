@@ -56,7 +56,7 @@
 
     <group id="Sonar.BaseProjectMenu">
       <reference ref="Sonar.GoToDashboard"/>
-      <reference ref="Sonar.ShowMeasures"/>
+<!--      <reference ref="Sonar.ShowMeasures"/> -->
       <reference ref="Sonar.OpenDiffTool"/>
     </group>
 
