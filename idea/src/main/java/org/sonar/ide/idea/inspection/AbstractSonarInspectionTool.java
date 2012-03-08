@@ -67,9 +67,9 @@ public abstract class AbstractSonarInspectionTool extends LocalInspectionTool {
   }
 
   @Override
-  public void inspectionStarted(LocalInspectionToolSession session) {
+  public void inspectionStarted(LocalInspectionToolSession session, boolean onTheFly) {
     getLog().debug("Inspection started");
-    super.inspectionStarted(session);
+    super.inspectionStarted(session, onTheFly);
   }
 
   @Override

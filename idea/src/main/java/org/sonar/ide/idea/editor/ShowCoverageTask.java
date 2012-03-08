@@ -21,6 +21,7 @@
 package org.sonar.ide.idea.editor;
 
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
 import com.intellij.openapi.editor.markup.MarkupModel;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
@@ -46,8 +47,8 @@ public class ShowCoverageTask extends AbstractSonarTask {
   private static final Color PARTIALLY_COVERED = Color.YELLOW;
   private static final Color FULLY_COVERED = Color.GREEN;
 
-  public ShowCoverageTask(@Nullable Project project, Document document, String resourceKey) {
-    super(project, "Loading violations from Sonar for " + resourceKey, document, resourceKey);
+  public ShowCoverageTask(@Nullable Editor editor, String resourceKey) {
+    super(editor, "Loading violations from Sonar for " + resourceKey, resourceKey);
   }
 
   @Override

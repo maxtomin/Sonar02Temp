@@ -21,6 +21,7 @@
 package org.sonar.ide.idea.editor;
 
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
 import com.intellij.openapi.editor.markup.MarkupModel;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
@@ -44,8 +45,8 @@ import java.util.*;
 public class ShowViolationsTask extends AbstractSonarTask {
   private static final Key<Boolean> SONAR_DATA_KEY = Key.create("SONAR_DATA_KEY");
 
-  public ShowViolationsTask(@Nullable Project project, Document document, String resourceKey) {
-    super(project, "Loading violations from Sonar for " + resourceKey, document, resourceKey);
+  public ShowViolationsTask(@Nullable Editor editor, String resourceKey) {
+    super(editor, "Loading violations from Sonar for " + resourceKey, resourceKey);
   }
 
   @Override

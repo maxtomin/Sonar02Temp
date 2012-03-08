@@ -46,8 +46,6 @@ public class SonarEditorListener implements EditorFactoryListener {
     LOG.info("Editor created");
     try {
       Editor editor = editorFactoryEvent.getEditor();
-      Document document = editor.getDocument();
-      Project project = editor.getProject();
 
       /*
       editor.getGutter().registerTextAnnotation(new TextAnnotationGutterProvider() {
@@ -90,7 +88,7 @@ public class SonarEditorListener implements EditorFactoryListener {
       });
       */
 
-      processFile(project, document);
+      processFile(editor);
     } catch (Throwable e) { // NOSONAR
       // This is a critical part in file opening procedure in IDEA.
       // Even if we can't do something file should be opened anyway.
@@ -103,7 +101,7 @@ public class SonarEditorListener implements EditorFactoryListener {
     try {
       Editor editor = editorFactoryEvent.getEditor();
       Project project = editor.getProject();
-      MarkupModel markupModel = editor.getDocument().getMarkupModel(project);
+      MarkupModel markupModel = editor.getMarkupModel();
       ShowViolationsTask.removeSonarHighlighters(markupModel);
       ShowCoverageTask.removeSonarHighlighters(markupModel);
     } catch (Throwable e) { // NOSONAR
@@ -112,21 +110,21 @@ public class SonarEditorListener implements EditorFactoryListener {
     }
   }
 
-  protected void processFile(Project project, Document document) {
-    VirtualFile file = FileDocumentManager.getInstance().getFile(document);
+  protected void processFile(Editor editor) {
+    VirtualFile file = FileDocumentManager.getInstance().getFile(editor.getDocument());
 
     if (file instanceof SonarVirtualFile) {
       SonarVirtualFile sonarVirtualFile = (SonarVirtualFile) file;
-      new ShowViolationsTask(project, document, sonarVirtualFile.getResourceKey()).queue();
-      new ShowCoverageTask(project, document, sonarVirtualFile.getResourceKey()).queue();
+      new ShowViolationsTask(editor, sonarVirtualFile.getResourceKey()).queue();
+      new ShowCoverageTask(editor, sonarVirtualFile.getResourceKey()).queue();
       return;
     }
 
-    PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
+    PsiFile psiFile = PsiManager.getInstance(editor.getProject()).findFile(file);
     if (psiFile instanceof PsiJavaFile) {
       PsiJavaFile psiJavaFile = (PsiJavaFile) psiFile;
       final String resourceKey = IdeaResourceUtils.getInstance().getFileKey(psiJavaFile);
-      new ShowViolationsTask(project, document, resourceKey).queue();
+      new ShowViolationsTask(editor, resourceKey).queue();
     }
   }
 

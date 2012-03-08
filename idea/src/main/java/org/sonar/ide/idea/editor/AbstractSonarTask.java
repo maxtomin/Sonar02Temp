@@ -22,6 +22,7 @@ package org.sonar.ide.idea.editor;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.MarkupModel;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.progress.Task;
@@ -39,24 +40,24 @@ import org.sonar.ide.idea.utils.SonarUtils;
  * @author Evgeny Mandrikov
  */
 public abstract class AbstractSonarTask extends Task.Backgroundable {
-  private Document document;
+  private Editor editor;
   private String resourceKey;
 
-  protected AbstractSonarTask(@Nullable Project project, @NotNull String title, Document document, String resourceKey) {
-    super(project, title);
-    this.document = document;
+  protected AbstractSonarTask(@Nullable Editor editor, @NotNull String title, String resourceKey) {
+    super(editor.getProject(), title);
+    this.editor = editor;
     this.resourceKey = resourceKey;
   }
 
   public Document getDocument() {
-    return document;
+    return editor.getDocument();
   }
 
   public PsiFile getPsiFile() {
     return ApplicationManager.getApplication().runReadAction(new Computable<PsiFile>() {
       @Override
       public PsiFile compute() {
-        return PsiDocumentManager.getInstance(getProject()).getPsiFile(document);
+        return PsiDocumentManager.getInstance(getProject()).getPsiFile(editor.getDocument());
       }
     });
   }
@@ -69,7 +70,7 @@ public abstract class AbstractSonarTask extends Task.Backgroundable {
   }
 
   public MarkupModel getMarkupModel() {
-    return getDocument().getMarkupModel(getProject());
+    return editor.getMarkupModel();
   }
 
   public IdeaSonar getIdeaSonar() {

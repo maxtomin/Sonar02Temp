@@ -44,7 +44,7 @@ public class BlameSonar extends ErrorReportSubmitter {
       description.append(ideaLoggingEvent.getMessage()).append('\n');
       description.append(ideaLoggingEvent.getThrowableText()).append('\n');
     }
-    BrowserUtil.launchBrowser("mailto:user@sonar.codehaus.org", description.toString());
+    BrowserUtil.launchBrowser("mailto:user@sonar.codehaus.org");
     return new SubmittedReportInfo(null, "Error report", SubmittedReportInfo.SubmissionStatus.NEW_ISSUE);
   }
 }
