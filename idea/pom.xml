@@ -49,7 +49,7 @@
     <plugin.vendor.url>${project.organization.url}</plugin.vendor.url>
     <plugin.vendor.email>user@sonar.codehaus.org</plugin.vendor.email>
 
-    <sonar-ide-commons.version>0.2-SNAPSHOT</sonar-ide-commons.version>
+    <sonar-ide-commons.version>0.3-SNAPSHOT</sonar-ide-commons.version>
   </properties>
 
   <dependencies>
