@@ -23,9 +23,7 @@ package org.sonar.ide.shared;
 import org.apache.commons.lang.StringUtils;
 import org.sonar.ide.api.Logs;
 import org.sonar.ide.api.SonarIdeException;
-import org.sonar.ide.client.SonarClient;
 import org.sonar.wsclient.Host;
-import org.sonar.wsclient.Sonar;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -105,16 +103,6 @@ public class DefaultServerManager {
       }
     }
     return server;
-  }
-
-  public Sonar getSonar(String url) {
-    final Host server = createServer(url);
-    return new SonarClient(server.getHost(), server.getUsername(), server.getPassword());
-  }
-
-  public boolean testSonar(String url, String user, String password) throws Exception {
-    SonarClient sonar = new SonarClient(url, user, password);
-    return sonar.isAvailable();
   }
 
   protected File getServerListFile() {

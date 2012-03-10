@@ -64,7 +64,7 @@ public abstract class AbstractResourceUtils<MODEL> {
    * @param branch     branch
    * @return project key or null, if unable to determine
    */
-  public final String getProjectKey(String groupId, String artifactId, String branch) {
+  public static String getProjectKey(String groupId, String artifactId, String branch) {
     if (StringUtils.isBlank(groupId) || StringUtils.isBlank(artifactId)) {
       return null;
     }
@@ -75,17 +75,8 @@ public abstract class AbstractResourceUtils<MODEL> {
     return sb.toString();
   }
 
-  /**
-   * Returns project key for specified groupId and artifactId.
-   *
-   * @param groupId    groupId
-   * @param artifactId artifactId
-   * @return project key or null, if unable to determine
-   * @deprecated since 0.2, use {@link #getProjectKey(String, String, String)} instead of it
-   */
-  @Deprecated
-  public final String getProjectKey(String groupId, String artifactId) {
-    return getProjectKey(groupId, artifactId, null);
+  public static String[] parseProjectKey(String projectKey) {
+    return StringUtils.split(projectKey, DELIMITER);
   }
 
   /**

@@ -22,7 +22,7 @@ package org.sonar.ide.ui;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
-import org.sonar.ide.client.SonarClient;
+import org.sonar.ide.client.MetadataClient;
 import org.sonar.ide.shared.SonarProperties;
 
 import javax.swing.*;
@@ -47,7 +47,7 @@ public class SonarConfigPanel extends AbstractConfigPanel {
     JButton testConnection = new JButton("Test connection");
     testConnection.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        SonarClient sonar = new SonarClient(getHost(), getUsername(), getPassword());
+        MetadataClient sonar = new MetadataClient(getHost(), getUsername(), getPassword());
         if (!sonar.isAvailable()) {
           JOptionPane.showMessageDialog(
               SonarConfigPanel.this,
