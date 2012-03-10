@@ -46,10 +46,6 @@ public class MetadataClient {
    */
   private SortedMap<String, SortedMap<String, SortedSet<String>>> projects = new TreeMap<String, SortedMap<String, SortedSet<String>>>(); 
 
-  public MetadataClient(String host) {
-    this(host, "", "");
-  }
-
   public MetadataClient(String host, String username, String password) {
     this(new Sonar(new ExtendedHttpClient3Connector(new Host(host, username, password))));
   }
@@ -59,6 +55,8 @@ public class MetadataClient {
   }
 
   public void load() {
+    if (sonar == null) return;
+
     try {
       LOG.info("Connect");
       ServerQuery serverQuery = new ServerQuery();
@@ -68,7 +66,7 @@ public class MetadataClient {
 
       List<Resource> resources = sonar.findAll(new ResourceQuery().setScopes("PRJ"));
       for (Resource resource : resources) {
-        addResource(resource);
+        addResource(resource.getKey());
       }
 
     } catch (ConnectionException e) {
@@ -77,8 +75,12 @@ public class MetadataClient {
     }
   }
 
-  private void addResource(Resource resource) {
-    String[] tokens = AbstractResourceUtils.parseProjectKey(resource.getKey());
+  /**
+   * Add resource to the cache. Public usage is for testing purposes only.
+   * @param resource
+   */
+  public void addResource(String resource) {
+    String[] tokens = AbstractResourceUtils.parseProjectKey(resource);
     String groupId = null;
     String artifactId = null;
     String branch = null;
@@ -122,10 +124,24 @@ public class MetadataClient {
     return available;
   }
 
+  /**
+   * For test only
+   */
+  public void setAvailable(boolean available) {
+    this.available = available;
+  }
+
   public String getVersion() {
     return version;
   }
-  
+
+  /**
+   * For test only
+   */
+  public void setVersion(String version) {
+    this.version = version;
+  }
+
   public List<String> getGroups() {
     return projects == null ? Collections.<String>emptyList() : new ArrayList<String>(projects.keySet());
   }
@@ -137,7 +153,7 @@ public class MetadataClient {
 
   public List<String> getBranches(String groupId, String artifactId) {
     SortedMap<String, SortedSet<String>> aritfacts = projects == null ? null : projects.get(groupId);
-    SortedSet<String> branches = aritfacts == null ? null : aritfacts.get(groupId);
+    SortedSet<String> branches = aritfacts == null ? null : aritfacts.get(artifactId);
     return branches == null ? Collections.<String>emptyList() : new ArrayList<String>(branches);
   }
 }

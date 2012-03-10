@@ -39,8 +39,6 @@ public abstract class AbstractConfigPanel extends JPanel {
    */
   public abstract boolean isModified();
 
-  public abstract Properties getProperties();
-
   /**
    * Resets state of this component.
    */

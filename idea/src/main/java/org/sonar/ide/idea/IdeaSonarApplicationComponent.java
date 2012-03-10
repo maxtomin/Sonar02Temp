@@ -95,11 +95,5 @@ public class IdeaSonarApplicationComponent extends AbstractConfigurableComponent
       // TODO
       return false;
     }
-
-    @Override
-    public Properties getProperties() {
-      // TODO
-      return null;
-    }
   }
 }

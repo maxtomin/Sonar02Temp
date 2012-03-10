@@ -28,8 +28,11 @@ import com.intellij.openapi.module.ModuleComponent;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.Nullable;
+import org.sonar.ide.client.MetadataClient;
+import org.sonar.ide.idea.utils.SonarUtils;
 import org.sonar.ide.ui.AbstractConfigPanel;
 import org.sonar.ide.ui.ModulePanel;
+import org.sonar.wsclient.Sonar;
 
 /**
  * Per-module plugin component.
@@ -44,6 +47,9 @@ import org.sonar.ide.ui.ModulePanel;
 )
 public class IdeaSonarModuleComponent extends AbstractConfigurableComponent
     implements ModuleComponent, PersistentStateComponent<IdeaSonarModuleComponent.State> {
+
+
+  private final Module module;
 
   /**
    * The implementation of PersistentStateComponent works by serializing public fields and bean properties into an XML format.
@@ -115,6 +121,7 @@ public class IdeaSonarModuleComponent extends AbstractConfigurableComponent
   }
 
   public IdeaSonarModuleComponent(final Module module) {
+    this.module = module;
     getLog().info("Loaded component for {}", module);
   }
 
@@ -159,7 +166,10 @@ public class IdeaSonarModuleComponent extends AbstractConfigurableComponent
 
   @Override
   protected AbstractConfigPanel initConfigPanel() {
-    ModulePanel modulePanel = new ModulePanel();
+    Sonar sonar = SonarUtils.getIdeaSonar(module.getProject()).getSonar();
+    MetadataClient metadataClient = new MetadataClient(sonar);
+
+    ModulePanel modulePanel = new ModulePanel(metadataClient);
     modulePanel.setGroupId(getGroupId());
     modulePanel.setArtifactId(getArtifactId());
     modulePanel.setBranch(getBranch());
