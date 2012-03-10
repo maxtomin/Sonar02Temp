@@ -112,6 +112,9 @@ public class SonarEditorListener implements EditorFactoryListener {
 
   protected void processFile(Editor editor) {
     VirtualFile file = FileDocumentManager.getInstance().getFile(editor.getDocument());
+    if (file == null) {
+      return;
+    }
 
     if (file instanceof SonarVirtualFile) {
       SonarVirtualFile sonarVirtualFile = (SonarVirtualFile) file;
