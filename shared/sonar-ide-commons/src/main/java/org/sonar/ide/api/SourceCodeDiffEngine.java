@@ -28,6 +28,6 @@ package org.sonar.ide.api;
  */
 public interface SourceCodeDiffEngine {
 
-  SourceCodeDiff diff(String local[], String remote[]);
+  SourceCodeDiff diff(String local[], String[] remote);
 
 }

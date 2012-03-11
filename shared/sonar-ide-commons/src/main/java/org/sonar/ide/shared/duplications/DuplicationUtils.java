@@ -71,7 +71,7 @@ public final class DuplicationUtils {
   public static List<Duplication> convertLines(Collection<Duplication> duplications, SourceCodeDiff diff) {
     List<Duplication> result = new ArrayList<Duplication>();
     for (Duplication duplication : duplications) {
-      int newLine = diff.newLine(duplication.getStart());
+      int newLine = diff.localLine(duplication.getStart());
       if (newLine != -1) {
         duplication.setStart(newLine);
         // TODO convert targetStart

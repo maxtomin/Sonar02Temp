@@ -37,24 +37,28 @@ public final class SourceCodeDiff {
   }
 
   /**
-   * @param oldLine line in Sonar server (starting from 1)
-   * @param newLine line in working copy (starting from 0), -1 if not found
+   * @param remoteLine line in Sonar server (starting from 1)
+   * @param localLine line in working copy (starting from 0), -1 if not found
    */
-  public void map(int oldLine, int newLine) {
-    if (newLine != NOT_FOUND) {
-      diff.put(oldLine, newLine);
+  public void map(int remoteLine, int localLine) {
+    if (localLine != NOT_FOUND) {
+      diff.put(remoteLine, localLine);
     }
   }
 
   /**
-   * @param oldLine line in Sonar server (starting from 1)
+   * @param remoteLine line in Sonar server (starting from 1)
    * @return line in working copy (starting from 0), -1 if not found
    */
-  public Integer newLine(int oldLine) {
-    if (diff.containsKey(oldLine)) {
-      return diff.get(oldLine);
+  public int localLine(int remoteLine) {
+    if (diff.containsKey(remoteLine)) {
+      return diff.get(remoteLine);
     }
     return NOT_FOUND;
+  }
+
+  public int remoteSize() {
+    return diff.size();
   }
 
   @Override

@@ -22,16 +22,26 @@ package org.sonar.ide.wsclient;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.sonar.ide.api.SourceCodeDiff;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 /**
- * @author Evgeny Mandrikov
+ * @author Max Tomin
  */
 public class SimpleSourceCodeDiffEngineTest {
 
+  private String[] chars(String str) {
+    String[] result = new String[str.length()];
+    for (int i = 0; i < str.length(); i++) {
+       result[i] = Character.toString(str.charAt(i));
+    }
+    return result;
+    
+  }
+  
   @Test
   public void testGetHashCode() {
     int hash1 = SimpleSourceCodeDiffEngine.getHashCode("int i;");
@@ -39,11 +49,13 @@ public class SimpleSourceCodeDiffEngineTest {
     int hash3 = SimpleSourceCodeDiffEngine.getHashCode("int i;\n");
     int hash4 = SimpleSourceCodeDiffEngine.getHashCode("int i;\r\n");
     int hash5 = SimpleSourceCodeDiffEngine.getHashCode("int i;\r");
+    int hash6 = SimpleSourceCodeDiffEngine.getHashCode("inti;");
 
     assertThat(hash2, equalTo(hash1));
     assertThat(hash3, equalTo(hash1));
     assertThat(hash4, equalTo(hash1));
     assertThat(hash5, equalTo(hash1));
+    assertThat(hash6, equalTo(hash1));
   }
 
   @Test
@@ -51,4 +63,76 @@ public class SimpleSourceCodeDiffEngineTest {
     assertThat(SimpleSourceCodeDiffEngine.split("\ntest\n").length, is(3));
   }
 
+  @Test
+  public void testSame() {
+    SourceCodeDiff result = new SimpleSourceCodeDiffEngine().diff(chars("abcd"), chars("abcd"));
+    assertThat(result.remoteSize(), equalTo(4));
+    assertThat(result.localLine(0), equalTo(0));
+    assertThat(result.localLine(1), equalTo(1));
+    assertThat(result.localLine(2), equalTo(2));
+    assertThat(result.localLine(3), equalTo(3));
+  }
+
+  @Test
+  public void testSame_WithDuplications() {
+    SourceCodeDiff result = new SimpleSourceCodeDiffEngine().diff(chars("abab"), chars("abab"));
+    assertThat(result.remoteSize(), equalTo(4));
+    assertThat(result.localLine(0), equalTo(0));
+    assertThat(result.localLine(1), equalTo(1));
+    assertThat(result.localLine(2), equalTo(2));
+    assertThat(result.localLine(3), equalTo(3));
+  }
+
+
+  @Test
+  public void testAdded() {
+    SourceCodeDiff result = new SimpleSourceCodeDiffEngine().diff(chars("abxcd"), chars("abcd"));
+    assertThat(result.remoteSize(), equalTo(4));
+    assertThat(result.localLine(0), equalTo(0));
+    assertThat(result.localLine(1), equalTo(1));
+    assertThat(result.localLine(2), equalTo(3));
+    assertThat(result.localLine(3), equalTo(4));
+  }
+
+  @Test
+  public void testAdded_WithDuplications() {
+    SourceCodeDiff result = new SimpleSourceCodeDiffEngine().diff(chars("abxab"), chars("abab"));
+    assertThat(result.remoteSize(), equalTo(4));
+    assertThat(result.localLine(0), equalTo(0));
+    assertThat(result.localLine(1), equalTo(1));
+    assertThat(result.localLine(2), equalTo(3));
+    assertThat(result.localLine(3), equalTo(4));
+  }
+
+  @Test
+  public void testRemoved() {
+    SourceCodeDiff result = new SimpleSourceCodeDiffEngine().diff(chars("abd"), chars("abcd"));
+    assertThat(result.remoteSize(), equalTo(3));
+    assertThat(result.localLine(0), equalTo(0));
+    assertThat(result.localLine(1), equalTo(1));
+    assertThat(result.localLine(2), equalTo(-1));
+    assertThat(result.localLine(3), equalTo(2));
+  }
+
+  @Test
+  public void testRemoved_WithDuplications() {
+    SourceCodeDiff result = new SimpleSourceCodeDiffEngine().diff(chars("abab"), chars("ababab"));
+    assertThat(result.remoteSize(), equalTo(4));
+    assertThat(result.localLine(0), equalTo(-1));
+    assertThat(result.localLine(1), equalTo(-1));
+    assertThat(result.localLine(2), equalTo(0));
+    assertThat(result.localLine(3), equalTo(1));
+    assertThat(result.localLine(4), equalTo(2));
+    assertThat(result.localLine(5), equalTo(3));
+  }
+
+  @Test
+  public void testDuplicate() {
+    SourceCodeDiff result = new SimpleSourceCodeDiffEngine().diff(chars("abbcd"), chars("abcd"));
+    assertThat(result.remoteSize(), equalTo(4));
+    assertThat(result.localLine(0), equalTo(0));
+    assertThat(result.localLine(1), equalTo(2));
+    assertThat(result.localLine(2), equalTo(3));
+    assertThat(result.localLine(3), equalTo(4));
+  }
 }

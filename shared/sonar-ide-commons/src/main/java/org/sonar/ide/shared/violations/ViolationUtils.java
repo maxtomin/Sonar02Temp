@@ -98,7 +98,7 @@ public final class ViolationUtils {
         continue;
       }
 
-      int newLine = diff.newLine(originalLine);
+      int newLine = diff.localLine(originalLine);
       // skip violation, which doesn't match any line
       if (newLine != -1) {
         violation.setLine(newLine);

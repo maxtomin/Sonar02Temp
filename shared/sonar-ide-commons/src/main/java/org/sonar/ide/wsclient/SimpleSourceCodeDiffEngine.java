@@ -28,13 +28,11 @@ import org.sonar.ide.api.SourceCodeDiffEngine;
 import org.sonar.wsclient.services.Source;
 
 /**
- * Actually this is an implementation of heuristic algorithm - magic happens here.
+ * Diff engine based on Longest Common Subsequence algorithm.
  *
- * @author Evgeny Mandrikov
+ * @author Max Tomin
  */
 public class SimpleSourceCodeDiffEngine implements SourceCodeDiffEngine {
-  private static final Logger LOG = LoggerFactory.getLogger(SimpleSourceCodeDiffEngine.class);
-
   public static SourceCodeDiffEngine getInstance() {
     return new SimpleSourceCodeDiffEngine();
   }
@@ -46,47 +44,54 @@ public class SimpleSourceCodeDiffEngine implements SourceCodeDiffEngine {
   /**
    * {@inheritDoc}
    */
-  public SourceCodeDiff diff(String[] local, String remote[]) {
+  public SourceCodeDiff diff(String[] localStrings, String[] remoteStrings) {
     SourceCodeDiff result = new SourceCodeDiff();
 
-    int[] hashCodes = getHashCodes(local);
-    // Works for O(S*L) time, where S - number of lines on server and L - number of lines in working copy.
-    for (int i = 0; i < remote.length; i++) {
-      int originalLine = i + 1;
-      int newLine = internalMatch(remote[i], hashCodes, originalLine);
-      if (newLine != -1) {
-        result.map(originalLine, newLine);
-      }
-    }
+    int[] local = getHashCodes(localStrings);
+    int[] remote = getHashCodes(remoteStrings);
 
-    return result;
-  }
+    //LCS length matrix. M[i][j] is negative if A[i] = B[j]
+    //therefore absolute value shall be used at all times
+    int[][] matrix = new int[local.length][remote.length];
 
-  /**
-   * Currently this method just compares hash codes (see {@link #getHashCode(String)}).
-   *
-   * @return -1 if not found
-   */
-  private int internalMatch(String originalSourceLine, int[] hashCodes, int originalLine) {
-    int newLine = -1;
-    int originalHashCode = getHashCode(originalSourceLine);
-    // line might not exists in working copy
-    if (originalLine - 1 < hashCodes.length) {
-      if (hashCodes[originalLine - 1] == originalHashCode) {
-        newLine = originalLine;
-      }
-    }
-    for (int i = 0; i < hashCodes.length; i++) {
-      if (hashCodes[i] == originalHashCode) {
-        if (newLine != -1 && newLine != originalLine) {
-          // may be more than one match, but we take into account only first
-          LOG.warn("Found more than one match for line '{}'", originalSourceLine);
-          break;
+    //populate the matrix:
+    for (int i = 0; i < local.length; i++) {
+      for (int j = 0; j < remote.length; j++) {
+        if (local[i] == remote[j]) {
+          //LCS(A[0..i], [0..j] = 1 + LCS(A[0..i-1], [0..j-1])
+          int length = 1;
+          if (i > 0 && j > 0) {
+            length += Math.abs(matrix[i-1][j-1]);
+          }
+          matrix[i][j] = -length;
+        } else {
+          //LCS(A[0..i], [0..j] = max(LCS(A[0..i], [0..j-1]), LCS(A[0..i-1], [0..j]))
+          int upper = i == 0 ? 0 : Math.abs(matrix[i-1][j]); 
+          int lefter = j == 0 ? 0 : Math.abs(matrix[i][j-1]);
+          matrix[i][j] = Math.max(upper, lefter);
         }
-        newLine = i + 1;
       }
     }
-    return newLine;
+
+    //backtrace and find mappings:
+    int i = local.length - 1;
+    int j = remote.length - 1;
+    while (i >= 0 && j >= 0 && matrix[i][j] != 0) {
+      if (matrix[i][j] < 0) {
+        result.map(j, i);
+        --i;
+        --j;
+      } else {
+        int upper = i == 0 ? 0 : Math.abs(matrix[i-1][j]);
+        int lefter = j == 0 ? 0 : Math.abs(matrix[i][j-1]);
+        if (upper > lefter) {
+          --i;
+        } else {
+          --j;
+        }
+      }
+    }
+    return result;
   }
 
   public static String[] split(String text) {
@@ -100,10 +105,14 @@ public class SimpleSourceCodeDiffEngine implements SourceCodeDiffEngine {
    * @return hash code for specified string after removing whitespaces
    */
   static int getHashCode(String str) {
-    if (str == null) {
-      return 0;
+    int h = 0;
+    for (int i = 0; i < str.length(); i++) {
+      char ch = str.charAt(i);
+      if (!Character.isWhitespace(ch)) { //ignore whitespaces
+        h = 31 * h + ch;
+      }
     }
-    return StringUtils.deleteWhitespace(str).hashCode();
+    return h;
   }
 
   /**
