@@ -71,8 +71,13 @@ public final class DuplicationUtils {
   public static List<Duplication> convertLines(Collection<Duplication> duplications, SourceCodeDiff diff) {
     List<Duplication> result = new ArrayList<Duplication>();
     for (Duplication duplication : duplications) {
-      int newLine = diff.localLine(duplication.getStart());
-      if (newLine != -1) {
+      int newLine = duplication.getStart();
+      if (diff != null) {
+        newLine = diff.localLine(duplication.getStart());
+      }
+      
+      if (newLine != SourceCodeDiff.NOT_FOUND) {
+        duplication = clone(duplication);
         duplication.setStart(newLine);
         // TODO convert targetStart
         result.add(duplication);
@@ -80,6 +85,11 @@ public final class DuplicationUtils {
     }
     return result;
   }
+  
+  public static Duplication clone(Duplication source) {
+    return new Duplication(source.getLines(), source.getStart(), source.getTargetStart(), source.getTargetResource());
+  }
+  
 
   /**
    * Hide utility-class constructor.

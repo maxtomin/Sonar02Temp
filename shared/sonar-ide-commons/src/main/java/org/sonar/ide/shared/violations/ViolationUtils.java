@@ -98,13 +98,28 @@ public final class ViolationUtils {
         continue;
       }
 
-      int newLine = diff.localLine(originalLine);
+      int newLine = diff == null ? originalLine : diff.localLine(originalLine);
       // skip violation, which doesn't match any line
-      if (newLine != -1) {
+      if (newLine != SourceCodeDiff.NOT_FOUND) {
+        violation = clone(violation);
         violation.setLine(newLine);
         result.add(violation);
       }
     }
+    return result;
+  }
+  
+  public static Violation clone(Violation source) {
+    Violation result = new Violation();
+    result.setMessage(source.getMessage());
+    result.setSeverity(source.getSeverity());
+    result.setLine(source.getLine());
+    result.setRuleKey(source.getRuleKey());
+    result.setResourceKey(source.getResourceKey());
+    result.setResourceName(source.getResourceName());
+    result.setResourceScope(source.getResourceScope());
+    result.setResourceQualifier(source.getResourceQualifier());
+    result.setCreatedAt(source.getCreatedAt());
     return result;
   }
 
