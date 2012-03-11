@@ -61,7 +61,6 @@ public class SonarInspectionToolsTest {
     assertThat(inspectionTool.getDisplayName(), notNullValue());
     assertThat(inspectionTool.getShortName(), notNullValue());
     Assert.assertTrue(Pattern.matches("[a-zA-Z_0-9.]+", inspectionTool.getShortName())); // see SONARIDE-57
-    assertThat(inspectionTool.getStaticDescription(), notNullValue());
   }
 
   @Test

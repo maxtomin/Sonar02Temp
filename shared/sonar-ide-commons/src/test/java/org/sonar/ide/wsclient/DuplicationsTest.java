@@ -20,19 +20,15 @@
 
 package org.sonar.ide.wsclient;
 
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import org.sonar.ide.shared.duplications.Duplication;
 
 import java.io.File;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.sonar.ide.shared.duplications.Duplication;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Evgeny Mandrikov
@@ -47,7 +43,8 @@ public class DuplicationsTest extends AbstractRemoteTestCase {
     assertThat(duplication.getLines(), greaterThan(0));
     assertThat(duplication.getStart(), greaterThan(0));
     assertThat(duplication.getTargetStart(), greaterThan(0));
-    assertThat(duplication.getTargetResource(), allOf(notNullValue(), not("")));
+    assertThat(duplication.getTargetResource(), notNullValue());
+    assertThat(duplication.getTargetResource(), not(""));
   }
 
   private List<Duplication> getDuplications(File project, String className) throws Exception {

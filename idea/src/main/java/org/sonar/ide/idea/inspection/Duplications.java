@@ -107,9 +107,4 @@ public class Duplications extends AbstractSonarInspectionTool {
   public String getShortName() {
     return "Sonar.Duplications"; // TODO
   }
-
-  @Override
-  public String getStaticDescription() {
-    return "Duplications from Sonar";
-  }
 }

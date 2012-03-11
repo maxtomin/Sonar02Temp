@@ -23,7 +23,6 @@ package org.sonar.ide.ui;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 import org.sonar.ide.client.MetadataClient;
-import org.sonar.ide.shared.SonarProperties;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -86,20 +85,6 @@ public class SonarConfigPanel extends AbstractConfigPanel {
   public boolean isModified() {
     // TODO
     return true;
-  }
-
-  public Properties getProperties() {
-    Properties properties = new Properties();
-    properties.setProperty(SonarProperties.HOST_PROPERTY, getHost());
-    properties.setProperty(SonarProperties.USERNAME_PROPERTY, getUsername());
-    properties.setProperty(SonarProperties.PASSWORD_PROPERTY, getPassword());
-    return properties;
-  }
-
-  public void setProperties(Properties properties) {
-    setHost(properties.getProperty(SonarProperties.HOST_PROPERTY));
-    setUsername(properties.getProperty(SonarProperties.USERNAME_PROPERTY));
-    setPassword(properties.getProperty(SonarProperties.PASSWORD_PROPERTY));
   }
 
   public String getHost() {

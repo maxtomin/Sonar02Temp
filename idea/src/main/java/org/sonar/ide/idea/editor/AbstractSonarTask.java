@@ -62,9 +62,6 @@ public abstract class AbstractSonarTask extends Task.Backgroundable {
     });
   }
 
-  /**
-   * @deprecated use {@link #getPsiFile()} instead of it
-   */
   public String getResourceKey() {
     return resourceKey;
   }

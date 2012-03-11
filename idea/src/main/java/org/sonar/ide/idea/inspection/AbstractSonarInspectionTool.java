@@ -22,6 +22,7 @@ package org.sonar.ide.idea.inspection;
 
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.LocalInspectionToolSession;
+import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
@@ -73,9 +74,9 @@ public abstract class AbstractSonarInspectionTool extends LocalInspectionTool {
   }
 
   @Override
-  public void inspectionFinished(LocalInspectionToolSession session) {
+  public void inspectionFinished(LocalInspectionToolSession session, ProblemsHolder problemsHolder) {
     getLog().debug("Inspection finished");
-    super.inspectionFinished(session);
+    super.inspectionFinished(session, problemsHolder);
   }
 
   @NotNull

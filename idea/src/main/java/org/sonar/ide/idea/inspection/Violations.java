@@ -57,11 +57,6 @@ public class Violations extends AbstractSonarInspectionTool {
     return "Sonar.Violations"; // TODO
   }
 
-  @Override
-  public String getStaticDescription() {
-    return "Violations from Sonar (Checkstyle, PMD, Findbugs, ...)";
-  }
-
   @Nullable
   @Override
   public ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
