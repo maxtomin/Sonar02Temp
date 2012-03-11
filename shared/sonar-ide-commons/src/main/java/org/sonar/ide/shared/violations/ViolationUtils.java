@@ -30,11 +30,11 @@ import java.util.*;
  * @author Evgeny Mandrikov
  */
 public final class ViolationUtils {
-  public static final String PRIORITY_BLOCKER = "blocker";
-  public static final String PRIORITY_CRITICAL = "critical";
-  public static final String PRIORITY_MAJOR = "major";
-  public static final String PRIORITY_MINOR = "minor";
-  public static final String PRIORITY_INFO = "info";
+  public static final String SEVERITY_BLOCKER = "blocker";
+  public static final String SEVERITY_CRITICAL = "critical";
+  public static final String SEVERITY_MAJOR = "major";
+  public static final String SEVERITY_MINOR = "minor";
+  public static final String SEVERITY_INFO = "info";
 
   /**
    * Sorts violations by priority in descending order.
@@ -68,16 +68,16 @@ public final class ViolationUtils {
    * @param priority priority to convert
    * @return converted priority
    */
-  public static int convertPriority(String priority) {
-    if (PRIORITY_BLOCKER.equalsIgnoreCase(priority)) {
+  public static int convertSeverity(String priority) {
+    if (SEVERITY_BLOCKER.equalsIgnoreCase(priority)) {
       return 0;
-    } else if (PRIORITY_CRITICAL.equalsIgnoreCase(priority)) {
+    } else if (SEVERITY_CRITICAL.equalsIgnoreCase(priority)) {
       return 1;
-    } else if (PRIORITY_MAJOR.equalsIgnoreCase(priority)) {
+    } else if (SEVERITY_MAJOR.equalsIgnoreCase(priority)) {
       return 2;
-    } else if (PRIORITY_MINOR.equalsIgnoreCase(priority)) {
+    } else if (SEVERITY_MINOR.equalsIgnoreCase(priority)) {
       return 3;
-    } else if (PRIORITY_INFO.equalsIgnoreCase(priority)) {
+    } else if (SEVERITY_INFO.equalsIgnoreCase(priority)) {
       return 4;
     }
     return 4;
@@ -125,8 +125,8 @@ public final class ViolationUtils {
 
   static class PriorityComparator implements Comparator<Violation> {
     public int compare(Violation o1, Violation o2) {
-      int p1 = convertPriority(o1.getPriority());
-      int p2 = convertPriority(o2.getPriority());
+      int p1 = convertSeverity(o1.getSeverity());
+      int p2 = convertSeverity(o2.getSeverity());
       return p1 - p2;
     }
   }
@@ -155,7 +155,7 @@ public final class ViolationUtils {
   public static String toString(Violation violation) {
     return new ToStringBuilder(violation)
         .append("message", violation.getMessage())
-        .append("priority", violation.getPriority())
+        .append("severity", violation.getSeverity())
         .append("line", violation.getLine())
         .toString();
   }

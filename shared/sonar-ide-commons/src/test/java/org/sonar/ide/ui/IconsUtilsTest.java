@@ -68,9 +68,9 @@ public class IconsUtilsTest {
     assertThat(IconsUtils.getTendencyIconPath(newMeasure(1, -2)), is(IMAGES_PATH + "tendency/-2-green.png"));
   }
 
-  private Violation newViolation(String priority) {
+  private Violation newViolation(String severity) {
     Violation violation = new Violation();
-    violation.setPriority(priority);
+    violation.setSeverity(severity);
     return violation;
   }
 

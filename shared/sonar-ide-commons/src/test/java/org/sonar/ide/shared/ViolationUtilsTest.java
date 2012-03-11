@@ -38,13 +38,13 @@ import static org.mockito.Mockito.when;
  */
 public class ViolationUtilsTest {
   @Test
-  public void testConvertPriority() throws Exception {
-    assertThat(ViolationUtils.convertPriority("Blocker"), is(0));
-    assertThat(ViolationUtils.convertPriority("Critical"), is(1));
-    assertThat(ViolationUtils.convertPriority("Major"), is(2));
-    assertThat(ViolationUtils.convertPriority("Minor"), is(3));
-    assertThat(ViolationUtils.convertPriority("Info"), is(4));
-    assertThat(ViolationUtils.convertPriority("Other"), is(4));
+  public void testConvertSeverity() throws Exception {
+    assertThat(ViolationUtils.convertSeverity("Blocker"), is(0));
+    assertThat(ViolationUtils.convertSeverity("Critical"), is(1));
+    assertThat(ViolationUtils.convertSeverity("Major"), is(2));
+    assertThat(ViolationUtils.convertSeverity("Minor"), is(3));
+    assertThat(ViolationUtils.convertSeverity("Info"), is(4));
+    assertThat(ViolationUtils.convertSeverity("Other"), is(4));
   }
 
   @Test
@@ -82,9 +82,9 @@ public class ViolationUtilsTest {
     assertThat(ViolationUtils.getDescription(violation), is("Unused : Avoid unused"));
   }
 
-  protected Violation newViolation(String priority, int line) {
+  protected Violation newViolation(String severity, int line) {
     Violation violation = new Violation();
-    violation.setPriority(priority);
+    violation.setSeverity(severity);
     violation.setLine(line);
     return violation;
   }

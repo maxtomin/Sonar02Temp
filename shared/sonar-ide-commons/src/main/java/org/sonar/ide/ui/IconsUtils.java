@@ -57,8 +57,8 @@ public final class IconsUtils {
    * @return priority icon
    */
   public static String getPriorityIconPath(Violation violation) {
-    String priority = violation.getPriority();
-    return IMAGES_PATH + "priority/" + priority.toLowerCase() + ".gif";
+    String severity = violation.getSeverity();
+    return IMAGES_PATH + "priority/" + severity.toLowerCase() + ".gif";
   }
 
   public static String getTendencyIconPath(Measure measure, boolean small) {
@@ -113,8 +113,8 @@ public final class IconsUtils {
    * @return color
    */
   public static Color getColor(Violation violation) {
-    String priority = violation.getPriority();
-    return VIOLATION_COLOR[ViolationUtils.convertPriority(priority)];
+    String severity = violation.getSeverity();
+    return VIOLATION_COLOR[ViolationUtils.convertSeverity(severity)];
   }
 
   /**
