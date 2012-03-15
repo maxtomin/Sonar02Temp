@@ -35,10 +35,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * EXPERIMENTAL!!!
@@ -53,10 +50,11 @@ class RemoteSonarIndex implements SourceCodeSearchEngine {
   private final Host host;
   private final Sonar sonar;
   private final SourceCodeDiffEngine diffEngine;
+  private final Map<String, RemoteSourceCode> cache = new HashMap<String, RemoteSourceCode>();
 
   /**
-   * Only for testing purposes.
-   */
+  * Only for testing purposes.
+  */
   protected RemoteSonarIndex(Host host) {
     this(host, null);
   }
@@ -75,11 +73,32 @@ class RemoteSonarIndex implements SourceCodeSearchEngine {
    * {@inheritDoc}
    */
   public SourceCode search(String key) {
-    Resource resource = sonar.find(new ResourceQuery().setResourceKeyOrId(key));
-    if (resource == null) {
-      return null;
+    //TODO tominm: cache non-existent resources as well
+    ResourceQuery query = new ResourceQuery();
+    RemoteSourceCode result = cache.get(key);
+    Resource resource = null;
+    if (result != null && result.obsoleteCheckRequired()) {
+      //check if the resource is obsolete
+      resource = sonar.find(query.setResourceKeyOrId(key));
+      if (result.isObsolete(resource.getDate())) {
+        //it is - remove it
+        result = null;
+        cache.remove(key);
+      }
     }
-    return new RemoteSourceCode(key).setRemoteSonarIndex(this);
+    if (result == null) {
+      //resource is either obsolete or never existed
+      //query resource if we haven't done it yet:
+      if (resource == null) {
+        resource = sonar.find(query.setResourceKeyOrId(key));
+      }
+      //create and cache data object (if it exists at all in Sonar):
+      if (resource != null) {
+        result = new RemoteSourceCode(key, resource.getDate()).setRemoteSonarIndex(this);
+        cache.put(key, result);
+      }
+    }
+    return result;
   }
 
   /**
@@ -88,7 +107,7 @@ class RemoteSonarIndex implements SourceCodeSearchEngine {
   public Collection<SourceCode> getProjects() {
     ArrayList<SourceCode> result = Lists.newArrayList();
     for (Resource resource : sonar.findAll(new ResourceQuery())) {
-      result.add(new RemoteSourceCode(resource.getKey(), resource.getName()).setRemoteSonarIndex(this));
+      result.add(new RemoteSourceCode(resource.getKey(), resource.getDate()).setRemoteSonarIndex(this));
     }
     return result;
   }

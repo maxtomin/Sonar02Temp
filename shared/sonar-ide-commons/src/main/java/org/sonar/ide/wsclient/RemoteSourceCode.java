@@ -20,13 +20,8 @@
 
 package org.sonar.ide.wsclient;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -58,18 +53,13 @@ import com.google.common.collect.Lists;
  * @author Evgeny Mandrikov
  * @since 0.2
  */
-class RemoteSourceCode implements SourceCode {
+class RemoteSourceCode implements SourceCode, ObsoleteControllable {
 
   private final String key;
-  private final String name;
+  private final ObsoleteControllableImpl delegate = new ObsoleteControllableImpl(10, TimeUnit.MINUTES);
   private RemoteSonarIndex index;
 
   private String localContent;
-
-  /**
-   * Lazy initialization - see {@link #getDiff()}.
-   */
-  private SourceCodeDiff diff;
 
   /**
    * Lazy initialization - see {@link #getRemoteContentAsArray()}.
@@ -81,13 +71,23 @@ class RemoteSourceCode implements SourceCode {
    */
   private Set<SourceCode> children;
 
+  /**
+   * Lazy initialization - see {@link #getViolations()}.
+   */
+  private List<Violation> violations;
+
+  /**
+   * Lazy initialization - see {@link #getDuplications()}.
+   */
+  private List<Duplication> duplications;
+
   public RemoteSourceCode(String key) {
     this(key, null);
   }
 
-  public RemoteSourceCode(String key, String name) {
+  public RemoteSourceCode(String key, Date remoteDate) {
     this.key = key;
-    this.name = name;
+    updateTo(remoteDate);
   }
 
   /**
@@ -100,20 +100,13 @@ class RemoteSourceCode implements SourceCode {
   /**
    * {@inheritDoc}
    */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
   public Set<SourceCode> getChildren() {
     if (children == null) {
       ResourceQuery query = new ResourceQuery().setDepth(1).setResourceKeyOrId(getKey());
       Collection<Resource> resources = index.getSonar().findAll(query);
       children = new HashSet<SourceCode>();
       for (Resource resource : resources) {
-        children.add(new RemoteSourceCode(resource.getKey(), resource.getName()).setRemoteSonarIndex(index));
+        children.add(new RemoteSourceCode(resource.getKey(), resource.getDate()).setRemoteSonarIndex(index));
       }
     }
     return children;
@@ -136,7 +129,8 @@ class RemoteSourceCode implements SourceCode {
 
   private String[] getRemoteContentAsArray() {
     if (remoteContent == null) {
-      remoteContent = SimpleSourceCodeDiffEngine.getLines(getCode());
+      Source source = index.getSonar().find(new SourceQuery(getKey()));
+      remoteContent = SimpleSourceCodeDiffEngine.getLines(source);
     }
     return remoteContent;
   }
@@ -146,10 +140,7 @@ class RemoteSourceCode implements SourceCode {
   }
 
   private SourceCodeDiff getDiff() {
-    if (diff == null) {
-      diff = index.getDiffEngine().diff(SimpleSourceCodeDiffEngine.split(getLocalContent()), getRemoteContentAsArray());
-    }
-    return diff;
+    return index.getDiffEngine().diff(SimpleSourceCodeDiffEngine.split(getLocalContent()), getRemoteContentAsArray());
   }
 
   /**
@@ -192,9 +183,11 @@ class RemoteSourceCode implements SourceCode {
    * {@inheritDoc}
    */
   public List<Violation> getViolations() {
-    Logs.INFO.info("Loading violations for {}", getKey());
-    final Collection<Violation> violations = index.getSonar().findAll(ViolationQuery.createForResource(getKey()));
-    Logs.INFO.info("Loaded {} violations: {}", violations.size(), ViolationUtils.toString(violations));
+    if (violations == null) {
+      Logs.INFO.info("Loading violations for {}", getKey());
+      violations = index.getSonar().findAll(ViolationQuery.createForResource(getKey()));
+      Logs.INFO.info("Loaded {} violations: {}", violations.size(), ViolationUtils.toString(violations));
+    }
     return ViolationUtils.convertLines(violations, getDiff());
   }
 
@@ -202,14 +195,16 @@ class RemoteSourceCode implements SourceCode {
    * {@inheritDoc}
    */
   public List<Duplication> getDuplications() {
-    Logs.INFO.info("Loading duplications for {}", getKey());
-    final Resource resource = index.getSonar().find(ResourceQuery.createForMetrics(getKey(), DuplicationUtils.DUPLICATIONS_DATA));
-    final Measure measure = resource.getMeasure(DuplicationUtils.DUPLICATIONS_DATA);
-    if (measure == null) {
-      return Collections.emptyList();
+    if (duplications == null) {
+      Logs.INFO.info("Loading duplications for {}", getKey());
+      final Resource resource = index.getSonar().find(ResourceQuery.createForMetrics(getKey(), DuplicationUtils.DUPLICATIONS_DATA));
+      final Measure measure = resource.getMeasure(DuplicationUtils.DUPLICATIONS_DATA);
+      if (measure == null) {
+        return Collections.emptyList();
+      }
+      duplications = DuplicationUtils.parse(measure.getData());
+      Logs.INFO.info("Loaded {} duplications: {}", duplications.size(), duplications);
     }
-    final List<Duplication> duplications = DuplicationUtils.parse(measure.getData());
-    Logs.INFO.info("Loaded {} duplications: {}", duplications.size(), duplications);
     return DuplicationUtils.convertLines(duplications, getDiff());
   }
 
@@ -226,10 +221,6 @@ class RemoteSourceCode implements SourceCode {
     final List<Rule> rules = getRemoteSonarIndex().getSonar().findAll(new RuleQuery(/* TODO */"java").setProfile(measure.getData()));
     Logs.INFO.info("Loaded {} rules for profile {}", rules.size(), measure.getData());
     return rules;
-  }
-
-  private Source getCode() {
-    return index.getSonar().find(new SourceQuery(getKey()));
   }
 
   /**
@@ -261,5 +252,17 @@ class RemoteSourceCode implements SourceCode {
 
   protected RemoteSonarIndex getRemoteSonarIndex() {
     return index;
+  }
+
+  public boolean obsoleteCheckRequired() {
+    return delegate.obsoleteCheckRequired();
+  }
+
+  public boolean isObsolete(Date latestDate) {
+    return delegate.isObsolete(latestDate);
+  }
+
+  public void updateTo(Date latestDate) {
+    delegate.updateTo(latestDate);
   }
 }

@@ -32,6 +32,7 @@ import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.sonar.ide.api.SourceCode;
 import org.sonar.ide.idea.utils.SonarUtils;
 import org.sonar.ide.shared.duplications.Duplication;
 import org.sonar.ide.shared.duplications.DuplicationUtils;
@@ -49,8 +50,9 @@ public class Duplications extends AbstractSonarInspectionTool {
   public ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
     getLog().debug("Running " + (isOnTheFly ? "on the fly" : "offline") + " inspection for " + file);
 
+    SourceCode sourceCode = SonarUtils.getIdeaSonar(file.getProject()).search(file);
     List<ProblemDescriptor> problems = buildProblemDescriptors(
-        SonarUtils.getIdeaSonar(file.getProject()).search(file).getDuplications(),
+        sourceCode == null ? null : sourceCode.getDuplications(),
         manager,
         file,
         isOnTheFly

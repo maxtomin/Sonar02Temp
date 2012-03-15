@@ -30,8 +30,6 @@ public interface SourceCode extends Comparable<SourceCode>, Measurable {
 
   String getKey();
 
-  String getName();
-
   Set<SourceCode> getChildren();
 
   /**

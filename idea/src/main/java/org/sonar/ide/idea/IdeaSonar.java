@@ -51,8 +51,10 @@ public class IdeaSonar extends RemoteSonar {
     return ApplicationManager.getApplication().runReadAction(new Computable<SourceCode>() {
       @Override
       public SourceCode compute() {
-        return search(IdeaResourceUtils.getInstance().getFileKey(file))
-            .setLocalContent(file.getText());
+        SourceCode result = search(IdeaResourceUtils.getInstance().getFileKey(file));
+        if (result != null)
+          result.setLocalContent(file.getText());
+        return result;
       }
     });
   }

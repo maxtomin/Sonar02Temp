@@ -24,9 +24,11 @@ import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.SelectInContext;
 import com.intellij.ide.SelectInTarget;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.Nullable;
+import org.sonar.ide.idea.utils.IdeaFolderResourceUtils;
 import org.sonar.ide.idea.utils.IdeaResourceUtils;
 import org.sonar.ide.idea.utils.SonarUtils;
 import org.sonar.ide.shared.SonarUrlUtils;
@@ -55,16 +57,20 @@ public class SelectInSonarTarget implements SelectInTarget {
 
   @Nullable
   private String getSonarUrl(Object selector, Project project) {
+    String resourceKey = null;
     if (selector instanceof PsiElement) {
       PsiElement psiElement = (PsiElement) selector;
       PsiFile psiFile = psiElement.getContainingFile();
-      String resourceKey = IdeaResourceUtils.getInstance().getFileKey(psiFile);
-      return SonarUrlUtils.getDashboard(
-          SonarUtils.getServer(project).getHost(),
-          resourceKey
-      );
+      resourceKey = IdeaResourceUtils.getInstance().getFileKey(psiFile);
+    } else if (selector instanceof VirtualFile) {
+      VirtualFile virtualFile = (VirtualFile) selector;
+      resourceKey = new IdeaFolderResourceUtils(project).getProjectKey(virtualFile);
+
     }
-    return null;
+    return resourceKey == null ? null : SonarUrlUtils.getDashboard(
+        SonarUtils.getServer(project).getHost(),
+        resourceKey
+    );
   }
 
   @Override

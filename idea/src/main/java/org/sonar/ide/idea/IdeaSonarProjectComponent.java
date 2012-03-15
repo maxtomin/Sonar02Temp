@@ -33,6 +33,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import org.sonar.ide.idea.editor.SonarEditorListener;
+import org.sonar.ide.idea.utils.SonarUtils;
 import org.sonar.ide.shared.SonarUrlUtils;
 import org.sonar.ide.ui.AbstractConfigPanel;
 import org.sonar.ide.ui.MeasuresPanel;
@@ -53,7 +54,7 @@ import org.sonar.wsclient.Host;
 public class IdeaSonarProjectComponent extends AbstractConfigurableComponent
     implements ProjectComponent, PersistentStateComponent<IdeaSonarProjectComponent.State> {
 
-  private Project project;
+  private final Project project;
   private State state = new State();
 
   public static class State {
@@ -120,12 +121,14 @@ public class IdeaSonarProjectComponent extends AbstractConfigurableComponent
   @Override
   public void projectOpened() {
     getLog().debug("Project opened");
+    SonarUtils.createIdeaSonar(project);
     registerToolWindow();
   }
 
   @Override
   public void projectClosed() {
     getLog().debug("Project closed");
+    SonarUtils.disposeIdeaSonar(project);
     unregisterToolWindow();
   }
 

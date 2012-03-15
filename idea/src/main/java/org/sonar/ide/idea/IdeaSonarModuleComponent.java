@@ -26,6 +26,8 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleComponent;
 import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.Nullable;
 import org.sonar.ide.client.MetadataClient;
@@ -118,6 +120,12 @@ public class IdeaSonarModuleComponent extends AbstractConfigurableComponent
       return null;
     }
     return getInstance(module);
+  }
+
+  @Nullable
+  public static IdeaSonarModuleComponent getInstance(VirtualFile file, Project project) {
+    Module module = ModuleUtil.findModuleForFile(file, project);
+    return module == null ? null : getInstance(module);
   }
 
   public IdeaSonarModuleComponent(final Module module) {

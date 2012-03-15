@@ -29,11 +29,16 @@ import org.sonar.wsclient.Host;
 import org.sonar.wsclient.Sonar;
 import org.sonar.wsclient.connectors.HttpClient4Connector;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Evgeny Mandrikov
  */
 public final class SonarUtils {
   private static final Logger LOG = LoggerFactory.getLogger(SonarUtils.class);
+  private static final Map<Project, IdeaSonar> sonars = new HashMap<Project, IdeaSonar>();
+
 
   /**
    * Hide utility-class constructor.
@@ -46,6 +51,16 @@ public final class SonarUtils {
   }
 
   public static IdeaSonar getIdeaSonar(Project project) {
-    return new IdeaSonar(getServer(project));
+    return sonars.get(project);
+  }
+
+  public static IdeaSonar createIdeaSonar(Project project) {
+    IdeaSonar result = new IdeaSonar(getServer(project));
+    sonars.put(project, result);
+    return result;
+  }
+
+  public static void disposeIdeaSonar(Project project) {
+    sonars.remove(project);
   }
 }
