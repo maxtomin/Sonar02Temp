@@ -73,6 +73,9 @@ class RemoteSonarIndex implements SourceCodeSearchEngine {
    * {@inheritDoc}
    */
   public SourceCode search(String key) {
+    if (key == null)
+      return null;
+
     //TODO tominm: cache non-existent resources as well
     ResourceQuery query = new ResourceQuery();
     RemoteSourceCode result = cache.get(key);

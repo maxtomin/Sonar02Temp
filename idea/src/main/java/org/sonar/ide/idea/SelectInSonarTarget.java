@@ -64,7 +64,7 @@ public class SelectInSonarTarget implements SelectInTarget {
       resourceKey = IdeaResourceUtils.getInstance().getFileKey(psiFile);
     } else if (selector instanceof VirtualFile) {
       VirtualFile virtualFile = (VirtualFile) selector;
-      resourceKey = new IdeaFolderResourceUtils(project).getProjectKey(virtualFile);
+      resourceKey = new IdeaFolderResourceUtils(project).getFileKey(virtualFile);
 
     }
     return resourceKey == null ? null : SonarUrlUtils.getDashboard(

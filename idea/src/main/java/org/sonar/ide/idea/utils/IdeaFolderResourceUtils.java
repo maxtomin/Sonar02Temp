@@ -58,6 +58,9 @@ public class IdeaFolderResourceUtils extends AbstractResourceUtils<VirtualFile> 
   public String getPackageName(VirtualFile file) {
     PsiDirectory directory = fileManager.findDirectory(file);
     PsiPackage aPackage = directory == null ? null : JavaDirectoryService.getInstance().getPackage(directory);
+    if (aPackage.getClasses().length == 0) {
+      aPackage = null; //Sonar doesnt support packages without classes - return null package (i.e. use module request)
+    }
     String result = aPackage == null ? null : aPackage.getQualifiedName();
 
     if (StringUtils.isWhitespace(result))

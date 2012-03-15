@@ -108,9 +108,11 @@ public abstract class AbstractResourceUtils<MODEL> {
       }
     }
     if (projectKey != null && componentName != null) {
-      result = new StringBuilder()
-          .append(projectKey).append(DELIMITER).append(componentName)
-          .toString();
+      StringBuilder stringBuilder = new StringBuilder().append(projectKey);
+      if (componentName != null) {
+        stringBuilder.append(DELIMITER).append(componentName);
+      }
+      result = stringBuilder.toString();
     }
     LOG.info("Component key for {} is {}", file, result);
     return result;
